@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pick the Right Tool — Challenge Brief</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
+
+  :root{
+    --paper:#F6F3EC;
+    --ink:#1C2B2A;
+    --moss:#33564F;
+    --signal:#E6592F;
+    --line:#D8D2C2;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Source Serif 4', serif;
+    font-size:18px;
+    line-height:1.55;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace; letter-spacing:.02em;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+
+  /* layout shell with a printed-card feel */
+  .wrap{max-width:780px; margin:0 auto; padding:0 28px;}
+
+  header.hero{
+    border-bottom:2px solid var(--ink);
+    padding:64px 0 40px;
+    position:relative;
+  }
+  .tag{
+    font-size:13px;
+    text-transform:uppercase;
+    color:var(--moss);
+    margin-bottom:18px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .tag::before{content:""; width:22px; height:2px; background:var(--signal); display:inline-block;}
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:clamp(34px,6vw,56px);
+    line-height:1.05;
+    margin:0 0 18px;
+    letter-spacing:-0.01em;
+  }
+  h1 em{
+    font-style:normal;
+    color:var(--signal);
+  }
+  .sub{
+    max-width:52ch;
+    color:#3c4a48;
+    font-size:19px;
+  }
+
+  nav.toc{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 18px;
+    margin-top:36px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+  }
+  nav.toc a{
+    color:var(--moss);
+    text-decoration:none;
+    border-bottom:1px dotted var(--moss);
+    padding-bottom:1px;
+  }
+  nav.toc a:hover{color:var(--signal); border-color:var(--signal);}
+
+  section{
+    padding:52px 0;
+    border-bottom:1px solid var(--line);
+  }
+  section:last-of-type{border-bottom:none;}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--signal);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin:0 0 10px;
+  }
+  h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(24px,3.6vw,32px);
+    margin:0 0 22px;
+    font-weight:700;
+  }
+  p{margin:0 0 16px;}
+  strong{color:var(--moss);}
+
+  ul, ol{padding-left:0; margin:0 0 16px; list-style:none;}
+  li{
+    position:relative;
+    padding-left:26px;
+    margin-bottom:10px;
+  }
+  ul li::before{
+    content:"→";
+    position:absolute; left:0; top:0;
+    color:var(--signal);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  ol{counter-reset:step;}
+  ol li{counter-increment:step;}
+  ol li::before{
+    content:counter(step) ".";
+    position:absolute; left:0; top:0;
+    color:var(--moss);
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:500;
+  }
+  ul.sub, ol.sub{margin-top:8px; margin-left:8px;}
+  ul.sub li::before{content:"–";}
+
+  /* problem cards */
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+    margin-top:8px;
+  }
+  @media (max-width:640px){ .card-grid{grid-template-columns:1fr;} }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    padding:18px 18px 16px;
+    border-radius:2px;
+  }
+  .card .glyph{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--signal);
+    display:block;
+    margin-bottom:8px;
+  }
+
+  /* user persona table-like cards */
+  .persona{
+    display:grid;
+    grid-template-columns:64px 1fr;
+    gap:18px;
+    padding:20px 0;
+    border-top:1px solid var(--line);
+  }
+  .persona:first-of-type{border-top:none;}
+  .persona .num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:30px;
+    font-weight:700;
+    color:var(--line);
+  }
+  .persona h3{
+    font-family:'Space Grotesk', sans-serif;
+    margin:0 0 6px;
+    font-size:19px;
+  }
+  .persona p{margin:0 0 6px; font-size:16.5px; color:#3c4a48;}
+  .persona .friction{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--signal);
+  }
+
+  /* goal banner */
+  .goals{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-top:8px;
+  }
+  @media (max-width:700px){ .goals{grid-template-columns:repeat(2,1fr);} }
+  .goal{
+    border:1px solid var(--ink);
+    padding:16px 14px;
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .goal span{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:#9fd6c4;
+    margin-bottom:8px;
+  }
+
+  /* rule of thumb / signature block */
+  .signature{
+    background:var(--moss);
+    color:var(--paper);
+    padding:44px 32px;
+    margin:0 -28px;
+    position:relative;
+  }
+  .signature .eyebrow{color:#A9D9C9;}
+  .signature h2{color:#fff;}
+  .rule-box{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:15px;
+    border-left:2px solid var(--signal);
+    padding-left:16px;
+    margin:18px 0;
+  }
+  .rule-box div{margin-bottom:6px;}
+  .rule-box .arrow{color:var(--signal);}
+
+  .one-liner{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:clamp(22px,3.4vw,30px);
+    line-height:1.25;
+    margin:18px 0 0;
+  }
+  .one-liner .accent{color:var(--signal);}
+
+  footer{
+    padding:46px 0 70px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:#6b756f;
+  }
+  footer a{color:var(--moss);}
+
+  @media (prefers-reduced-motion:no-preference){
+    section{
+      opacity:0;
+      transform:translateY(14px);
+      animation:rise .6s ease forwards;
+    }
+    section:nth-of-type(1){animation-delay:.02s;}
+    section:nth-of-type(2){animation-delay:.06s;}
+    section:nth-of-type(3){animation-delay:.10s;}
+    section:nth-of-type(4){animation-delay:.14s;}
+    section:nth-of-type(5){animation-delay:.18s;}
+    section:nth-of-type(6){animation-delay:.22s;}
+    section:nth-of-type(7){animation-delay:.26s;}
+  }
+  @keyframes rise{to{opacity:1; transform:none;}}
+
+  a:focus-visible, button:focus-visible{outline:2px solid var(--signal); outline-offset:3px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="tag mono">Challenge brief · ABC Bank</div>
+    <h1>Everyone has an AI tool.<br>Almost nobody knows <em>which one to use.</em></h1>
+    <p class="sub">A teenager-friendly walkthrough of the problem you're solving, who you're solving it for, and what "done" looks like.</p>
+    <nav class="toc">
+      <a href="#situation">01 Situation</a>
+      <a href="#problems">02 Problems</a>
+      <a href="#challenge">03 Challenge</a>
+      <a href="#users">04 Who you're helping</a>
+      <a href="#solution">05 What it should do</a>
+      <a href="#extra">06 Extra task</a>
+      <a href="#presentation">07 Final presentation</a>
+    </nav>
+  </header>
+
+  <section id="situation">
+    <p class="eyebrow">01 — What's the situation?</p>
+    <h2>A bank full of AI tools, used the wrong way</h2>
+    <p>ABC Bank uses lots of AI tools — ChatGPT-style assistants, coding tools, the works. <strong>Most employees use AI a lot.</strong> But most of them don't feel like they're using it properly.</p>
+    <p>They get confused about:</p>
+    <ul>
+      <li>Which tool to use</li>
+      <li>How to use it well</li>
+      <li>When they're wasting time or money</li>
+    </ul>
+  </section>
+
+  <section id="problems">
+    <p class="eyebrow">02 — What problems do people face?</p>
+    <h2>Three apps, no instructions</h2>
+    <p>Think of it like having three different apps that all do similar things — but no one tells you which one is best.</p>
+    <div class="card-grid">
+      <div class="card"><span class="glyph">friction/01</span>Picking the right AI tool for each task</div>
+      <div class="card"><span class="glyph">friction/02</span>Giving up because tools are too complicated</div>
+      <div class="card"><span class="glyph">friction/03</span>Using expensive tools when a cheaper one would do</div>
+      <div class="card"><span class="glyph">friction/04</span>Only using basic features and missing better options</div>
+    </div>
+  </section>
+
+  <section id="challenge">
+    <p class="eyebrow">03 — Your challenge</p>
+    <h2>Design a platform that helps people decide, fast</h2>
+    <p>You need to design a website (platform) that helps employees quickly figure out:</p>
+    <ul>
+      <li>Which AI tool to use</li>
+      <li>How to use it properly</li>
+      <li>What the best option is for their task</li>
+    </ul>
+  </section>
+
+  <section id="users">
+    <p class="eyebrow">04 — Who are you helping?</p>
+    <h2>Four types of users, four sets of friction</h2>
+
+    <div class="persona">
+      <div class="num mono">01</div>
+      <div>
+        <h3>Business Analysts</h3>
+        <p>Make reports, presentations, and financial analysis.</p>
+        <p class="friction">stuck on → don't know which AI to use for writing vs. analysing</p>
+      </div>
+    </div>
+    <div class="persona">
+      <div class="num mono">02</div>
+      <div>
+        <h3>Developers (coders)</h3>
+        <p>Write and fix code.</p>
+        <p class="friction">stuck on → need help picking tools for coding tasks</p>
+      </div>
+    </div>
+    <div class="persona">
+      <div class="num mono">03</div>
+      <div>
+        <h3>Project Managers</h3>
+        <p>Plan projects and communicate with teams.</p>
+        <p class="friction">stuck on → unsure which tool fits admin tasks</p>
+      </div>
+    </div>
+    <div class="persona">
+      <div class="num mono">04</div>
+      <div>
+        <h3>Non-technical users</h3>
+        <p>Write emails, summaries, basic data work.</p>
+        <p class="friction">stuck on → usually stick to one tool without thinking</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="solution">
+    <p class="eyebrow">05 — What your solution should do</p>
+    <h2>The platform's job, in four moves</h2>
+    <div class="goals">
+      <div class="goal"><span>move/01</span>Help people choose the right AI tool quickly</div>
+      <div class="goal"><span>move/02</span>Save time making decisions</div>
+      <div class="goal"><span>move/03</span>Avoid wasting money</div>
+      <div class="goal"><span>move/04</span>Help people work faster and better</div>
+    </div>
+  </section>
+
+  <section id="extra">
+    <p class="eyebrow">06 — Extra task (important!)</p>
+    <h2>Talk to two real employees</h2>
+    <p>You'll get to talk to 2 real employees using AI. You must:</p>
+    <ul>
+      <li>Prepare at least 5 questions</li>
+      <li>Ask about their struggles</li>
+      <li>Ask how they use AI</li>
+      <li>Ask what confuses them</li>
+    </ul>
+  </section>
+
+  <section id="presentation">
+    <p class="eyebrow">07 — Final presentation</p>
+    <h2>What you'll need to explain</h2>
+    <ol>
+      <li>The problem (what's going wrong)</li>
+      <li>Your solution (your platform idea)</li>
+      <li>A prototype (what it looks like / how it works)</li>
+      <li>How you used AI</li>
+      <li>What you learned as a team</li>
+    </ol>
+  </section>
+
+  <div class="signature">
+    <p class="eyebrow mono">Simple way to think about it</p>
+    <h2>You're basically building a smart guide</h2>
+    <p>A "smart guide" that tells people how to use AI properly at work. Like:</p>
+    <div class="rule-box">
+      <div><span class="arrow">if</span> you want to write an email <span class="arrow">→</span> use Tool A</div>
+      <div><span class="arrow">if</span> you want to code <span class="arrow">→</span> use Tool B</div>
+    </div>
+    <p class="one-liner">In one sentence: Help people stop guessing and <span class="accent">start using the right AI tool the right way.</span></p>
+  </div>
+
+  <footer>
+    <p>Need a hand? Ask for creative ideas for your platform, help designing a prototype, or example questions for the Q&amp;A session.</p>
+  </footer>
+</div>
+
+</body>
+</html>
