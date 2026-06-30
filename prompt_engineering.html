@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>How to Make AI Actually Useful — Interactive Prompt Engineering Session</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
+  :root{
+    --paper:#F6F3EC;
+    --ink:#1C2B2A;
+    --moss:#33564F;
+    --signal:#E6592F;
+    --line:#D8D2C2;
+    --card:#FFFFFF;
+    --blue:#2478FF;
+    --coral:#FF6363;
+    --green:#167D52;
+    --mint:#7EDFB2;
+    --gold:#FFD166;
+    --purple:#A78BFA;
+    --shadow:0 18px 45px rgba(28,43,42,.10);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at top right, rgba(36,120,255,.08), transparent 32rem),
+      radial-gradient(circle at 10% 16%, rgba(230,89,47,.08), transparent 28rem),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Source Serif 4', serif;
+    font-size:18px;
+    line-height:1.55;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace; letter-spacing:.02em;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 28px;}
+  header.hero{
+    border-bottom:2px solid var(--ink);
+    padding:64px 0 40px;
+    position:relative;
+  }
+  .tag{
+    font-size:13px;
+    text-transform:uppercase;
+    color:var(--moss);
+    margin-bottom:18px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .tag::before{content:""; width:22px; height:2px; background:var(--signal); display:inline-block;}
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:clamp(38px,7vw,72px);
+    line-height:1.02;
+    margin:0 0 18px;
+    letter-spacing:-0.035em;
+  }
+  h1 em{font-style:normal; color:var(--signal);}
+  .sub{max-width:62ch; color:#3c4a48; font-size:20px; margin:0 0 20px;}
+  .micro-row{display:flex; flex-wrap:wrap; gap:10px; margin:28px 0 0;}
+  .pill{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.54);
+    padding:8px 11px;
+    border-radius:99px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--moss);
+  }
+  nav.toc{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 18px;
+    margin-top:34px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+  }
+  nav.toc a{color:var(--moss); text-decoration:none; border-bottom:1px dotted var(--moss); padding-bottom:1px;}
+  nav.toc a:hover{color:var(--signal); border-color:var(--signal);}
+  section{padding:54px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--signal); text-transform:uppercase; letter-spacing:.06em; margin:0 0 10px;}
+  h2{font-family:'Space Grotesk', sans-serif; font-size:clamp(25px,4vw,36px); line-height:1.12; margin:0 0 18px; font-weight:700; letter-spacing:-.015em;}
+  h3{font-family:'Space Grotesk', sans-serif; margin:0 0 8px; font-size:20px;}
+  p{margin:0 0 16px;}
+  strong{color:var(--moss);}
+  ul, ol{padding-left:0; margin:0 0 16px; list-style:none;}
+  li{position:relative; padding-left:26px; margin-bottom:10px;}
+  ul li::before{content:"→"; position:absolute; left:0; top:0; color:var(--signal); font-family:'IBM Plex Mono', monospace;}
+  ol{counter-reset:step;}
+  ol li{counter-increment:step;}
+  ol li::before{content:counter(step) "."; position:absolute; left:0; top:0; color:var(--moss); font-family:'IBM Plex Mono', monospace; font-weight:500;}
+  .card-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:14px;}
+  .card-grid.three{grid-template-columns:repeat(3,1fr);}
+  @media (max-width:760px){.card-grid,.card-grid.three{grid-template-columns:1fr;}}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    padding:20px 18px 18px;
+    border-radius:2px;
+    box-shadow:0 1px 0 rgba(28,43,42,.03);
+  }
+  .card .glyph{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--signal); display:block; margin-bottom:8px; text-transform:uppercase;}
+  .card.blue .glyph,.blue-text{color:var(--blue);} .card.green .glyph,.green-text{color:var(--green);} .card.gold .glyph,.gold-text{color:#AE7400;} .card.purple .glyph,.purple-text{color:var(--purple);}
+  .feature{
+    background:var(--moss);
+    color:var(--paper);
+    padding:44px 32px;
+    margin:0 -28px;
+    position:relative;
+  }
+  .feature .eyebrow{color:#A9D9C9;}
+  .feature h2{color:#fff;}
+  .rule-box{font-family:'IBM Plex Mono', monospace; font-size:15px; border-left:2px solid var(--signal); padding-left:16px; margin:18px 0;}
+  .rule-box div{margin-bottom:6px;} .rule-box .arrow{color:var(--signal);}
+  .one-liner{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:clamp(22px,3.4vw,30px); line-height:1.25; margin:18px 0 0;}
+  .one-liner .accent{color:var(--gold);}
+  .framework{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:20px;}
+  @media (max-width:780px){.framework{grid-template-columns:1fr;}}
+  .fw{background:#fff; border:1px solid var(--line); padding:18px 14px; text-align:center; min-height:148px;}
+  .fw b{display:block; font-family:'Space Grotesk',sans-serif; font-size:42px; line-height:1; margin-bottom:10px;}
+  .fw span{display:block; font-family:'IBM Plex Mono', monospace; font-size:12px; color:#516071;}
+  .comparison{display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:stretch; margin-top:18px;}
+  @media(max-width:760px){.comparison{grid-template-columns:1fr;}.arrow-column{display:none;}}
+  .prompt-box{background:#fff; border:1px solid var(--line); padding:18px; border-radius:4px;}
+  .prompt-box.bad{border-color:rgba(230,89,47,.45);} .prompt-box.good{border-color:rgba(36,120,255,.45);}
+  .prompt-box pre{white-space:pre-wrap; margin:0; font-family:'IBM Plex Mono',monospace; font-size:14px; color:#182438;}
+  .arrow-column{font-family:'Space Grotesk',sans-serif; font-size:34px; color:var(--signal); align-self:center;}
+  .level{display:grid; grid-template-columns:56px 1fr; gap:18px; padding:20px 0; border-top:1px solid var(--line);}
+  .level:first-of-type{border-top:none;}
+  .level .num{font-family:'Space Grotesk', sans-serif; font-size:30px; font-weight:700; color:var(--line);}
+  .interactive-panel{background:#fff; border:1px solid var(--ink); padding:22px; box-shadow:var(--shadow); margin-top:18px;}
+  label{display:block; font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--moss); text-transform:uppercase; margin:14px 0 6px;}
+  input, textarea, select{width:100%; border:1px solid var(--line); background:#FBFAF6; color:var(--ink); padding:11px 12px; font:15px/1.45 'Source Serif 4', serif; border-radius:2px;}
+  textarea{min-height:74px; resize:vertical;}
+  button{border:1px solid var(--ink); background:var(--ink); color:var(--paper); padding:11px 14px; font-family:'IBM Plex Mono', monospace; font-size:13px; cursor:pointer; margin-top:14px;}
+  button.secondary{background:transparent; color:var(--ink); margin-left:8px;}
+  button:hover{background:var(--signal); border-color:var(--signal); color:#fff;}
+  .output{margin-top:16px; padding:16px; background:#F6F3EC; border-left:2px solid var(--signal); font-family:'IBM Plex Mono', monospace; font-size:13.5px; white-space:pre-wrap; min-height:76px;}
+  .quiz{display:grid; gap:12px; margin-top:14px;}
+  .quiz button{display:block; width:100%; text-align:left; background:#fff; color:var(--ink); border-color:var(--line); margin:0; font-family:'Source Serif 4', serif; font-size:16px;}
+  .quiz button.correct{border-color:var(--green); background:#EFFBF6;} .quiz button.wrong{border-color:var(--signal); background:#FFF7F2;}
+  .task-orbit{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:18px;}
+  @media(max-width:820px){.task-orbit{grid-template-columns:1fr 1fr;}}
+  .task{border:1px solid var(--line); background:#fff; padding:16px; cursor:pointer; min-height:122px;}
+  .task:hover{border-color:var(--signal); transform:translateY(-1px); transition:.16s ease;}
+  .task.active{border-color:var(--ink); box-shadow:inset 0 0 0 2px var(--ink);}
+  footer{padding:46px 0 70px; font-family:'IBM Plex Mono', monospace; font-size:13px; color:#6b756f;}
+  footer a{color:var(--moss);}
+  @media (prefers-reduced-motion:no-preference){section{opacity:0; transform:translateY(14px); animation:rise .6s ease forwards;} section:nth-of-type(1){animation-delay:.02s;} section:nth-of-type(2){animation-delay:.06s;} section:nth-of-type(3){animation-delay:.10s;} section:nth-of-type(4){animation-delay:.14s;} section:nth-of-type(5){animation-delay:.18s;} section:nth-of-type(6){animation-delay:.22s;} section:nth-of-type(7){animation-delay:.26s;} section:nth-of-type(8){animation-delay:.30s;}}
+  @keyframes rise{to{opacity:1; transform:none;}}
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{outline:2px solid var(--signal); outline-offset:3px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="tag mono">Interactive session · Work Experience students</div>
+    <h1>How to Make<br><em>AI Actually Useful</em></h1>
+    <p class="sub">The cheat code for getting better answers, ideas and help from AI. This interactive page turns the prompt engineering deck into a browser-friendly lesson, toolkit and mini-workshop.</p>
+    <div class="micro-row">
+      <span class="pill">Audience: 16–19</span>
+      <span class="pill">Topic: Prompt engineering</span>
+      <span class="pill">Framework: GCSCE</span>
+      <span class="pill">Format: Learn → Try → Improve</span>
+    </div>
+    <nav class="toc">
+      <a href="#intro">01 Introduction</a>
+      <a href="#fundamentals">02 AI fundamentals</a>
+      <a href="#rule">03 Big rule</a>
+      <a href="#framework">04 GCSCE</a>
+      <a href="#levels">05 Prompting levels</a>
+      <a href="#jobs">06 Different jobs</a>
+      <a href="#builder">07 Prompt builder</a>
+      <a href="#workshop">08 Workshop</a>
+    </nav>
+  </header>
+
+  <section id="intro">
+    <p class="eyebrow">01 — A quick introduction</p>
+    <h2>Prompting is not about sounding clever. It is about being clear.</h2>
+    <p><strong>AI does not read your mind.</strong> It responds to the instructions you give it. The better the instruction, the more useful the answer is likely to be.</p>
+    <div class="card-grid three">
+      <div class="card blue"><span class="glyph">Today / 01</span>Understand what AI, GenAI and LLMs mean in plain English.</div>
+      <div class="card"><span class="glyph">Today / 02</span>Learn why vague prompts usually create vague answers.</div>
+      <div class="card green"><span class="glyph">Today / 03</span>Practise building better prompts using a simple checklist.</div>
+    </div>
+  </section>
+
+  <section id="fundamentals">
+    <p class="eyebrow">02 — AI fundamentals</p>
+    <h2>Generative AI is only one part of the wider AI puzzle</h2>
+    <p>Think of AI as the umbrella term. Under it you have rules-based systems, machine learning, generative AI and large language models.</p>
+    <div class="card-grid">
+      <div class="card blue"><span class="glyph">Artificial Intelligence</span>Software that seems to make smart choices. Example: a social feed ranking posts.</div>
+      <div class="card"><span class="glyph">Rules-based AI</span>Fixed if/then logic for predictable results. Example: a support bot using menu options.</div>
+      <div class="card green"><span class="glyph">Machine Learning</span>Learns patterns from data over time. Example: TikTok learning what you rewatch.</div>
+      <div class="card gold"><span class="glyph">Generative AI + LLMs</span>Creates new text, images, summaries, slides or code. LLMs are especially focused on language.</div>
+    </div>
+  </section>
+
+  <section id="rule">
+    <div class="feature">
+      <p class="eyebrow mono">03 — The big rule</p>
+      <h2>Vague prompt = vague answer.<br>Clear prompt = useful answer.</h2>
+      <p>If the answer is weak, upgrade the instructions before blaming the tool.</p>
+      <div class="rule-box">
+        <div><span class="arrow">weak:</span> Explain climate change.</div>
+        <div><span class="arrow">better:</span> Explain climate change to a 16-year-old GCSE Geography student in 200 words.</div>
+      </div>
+      <p class="one-liner">AI is <span class="accent">smart</span>, but it is not psychic.</p>
+    </div>
+  </section>
+
+  <section id="framework">
+    <p class="eyebrow">04 — Use this checklist</p>
+    <h2>The GCSCE prompt framework</h2>
+    <p><strong>Goal. Context. Specifics. Constraints. Evaluate.</strong> A simple structure students can remember and reuse.</p>
+    <div class="framework">
+      <div class="fw"><b style="color:var(--blue)">G</b><h3>Goal</h3><span>What am I asking for?</span></div>
+      <div class="fw"><b style="color:var(--coral)">C</b><h3>Context</h3><span>What does AI need to know?</span></div>
+      <div class="fw"><b style="color:var(--mint)">S</b><h3>Specifics</h3><span>What should be included?</span></div>
+      <div class="fw"><b style="color:var(--gold)">C</b><h3>Constraints</h3><span>How long, tone, format?</span></div>
+      <div class="fw"><b style="color:var(--purple)">E</b><h3>Evaluate</h3><span>How can it improve or check?</span></div>
+    </div>
+  </section>
+
+  <section id="levels">
+    <p class="eyebrow">05 — Confidence ladder</p>
+    <h2>Three prompting levels</h2>
+    <div class="level"><div class="num mono">01</div><div><h3>Basic prompting</h3><p><strong>Ask clearly.</strong> Example: “Explain photosynthesis in simple terms.” Good for quick explanations and first drafts, but AI still has to guess your level, format and detail.</p></div></div>
+    <div class="level"><div class="num mono">02</div><div><h3>Intermediate prompting</h3><p><strong>Add context and format.</strong> Example: “Create a GCSE revision summary about photosynthesis for a 16-year-old Biology student. Use simple bullet points and finish with one quiz question.”</p></div></div>
+    <div class="level"><div class="num mono">03</div><div><h3>Advanced prompting</h3><p><strong>Add a role and process.</strong> Example: “Act as a friendly GCSE Biology tutor. Explain simply, give an analogy, quiz me, correct mistakes and give one revision tip.”</p></div></div>
+  </section>
+
+  <section id="jobs">
+    <p class="eyebrow">06 — Prompt choice</p>
+    <h2>Different prompts for different jobs</h2>
+    <p>There is no single perfect prompt. Match the prompt to the task.</p>
+    <div class="task-orbit" id="taskCards">
+      <div class="task active" data-tip="Topic + level + quiz"><h3 class="blue-text">Study</h3><p>Ask for revision help, explanations and practice questions.</p></div>
+      <div class="task" data-tip="Subject + style + format"><h3 style="color:var(--coral)">Images</h3><p>Describe what the camera should see.</p></div>
+      <div class="task" data-tip="Audience + structure + notes"><h3 class="green-text">Slides</h3><p>Give the AI the brief, not just the topic.</p></div>
+      <div class="task" data-tip="Tone + genre + constraints"><h3 class="gold-text">Creative</h3><p>Set the style, voice and limits.</p></div>
+      <div class="task" data-tip="Goal + experience + feedback"><h3 class="purple-text">Career</h3><p>Ask for advice matched to your experience.</p></div>
+    </div>
+    <div class="output" id="taskOutput">Study prompt recipe: Topic + level + quiz</div>
+  </section>
+
+  <section id="builder">
+    <p class="eyebrow">07 — Try it now</p>
+    <h2>Build a stronger prompt with GCSCE</h2>
+    <p>Fill in the boxes. The page will combine your answers into a copy-ready prompt.</p>
+    <div class="interactive-panel">
+      <label for="goal">Goal</label>
+      <input id="goal" placeholder="e.g. Create a GCSE revision summary about photosynthesis" />
+      <label for="context">Context</label>
+      <input id="context" placeholder="e.g. for a 16-year-old Biology student" />
+      <label for="specifics">Specifics</label>
+      <textarea id="specifics" placeholder="e.g. include inputs, outputs, why it matters and a simple analogy"></textarea>
+      <label for="constraints">Constraints</label>
+      <input id="constraints" placeholder="e.g. use simple language, bullet points and max 150 words" />
+      <label for="evaluate">Evaluate</label>
+      <input id="evaluate" placeholder="e.g. finish with one quiz question and one revision tip" />
+      <button type="button" onclick="buildPrompt()">Build my prompt</button>
+      <button class="secondary" type="button" onclick="loadExample()">Load example</button>
+      <button class="secondary" type="button" onclick="copyPrompt()">Copy output</button>
+      <div class="output" id="promptOutput">Your upgraded prompt will appear here.</div>
+    </div>
+  </section>
+
+  <section id="workshop">
+    <p class="eyebrow">08 — Workshop challenge</p>
+    <h2>Fix the prompt</h2>
+    <p>Weak prompt: <strong>“Help me revise history.”</strong> Upgrade it with GCSCE.</p>
+    <div class="comparison">
+      <div class="prompt-box bad"><span class="glyph mono" style="color:var(--signal)">weak prompt</span><pre>Help me revise history.</pre></div>
+      <div class="arrow-column">→</div>
+      <div class="prompt-box good"><span class="glyph mono" style="color:var(--blue)">your mission</span><pre>Upgrade it with a goal, context, specifics, constraints and evaluation step.</pre></div>
+    </div>
+    <div class="card-grid three">
+      <div class="card"><span class="glyph">2 minutes</span>Work solo. Choose the topic, level and output format.</div>
+      <div class="card blue"><span class="glyph">3 minutes</span>Compare with a partner. Which prompt gives AI the least to guess?</div>
+      <div class="card green"><span class="glyph">Share</span>Read out the strongest prompt and explain what improved.</div>
+    </div>
+
+    <div class="interactive-panel">
+      <h3>Quick check</h3>
+      <p>Which option is most likely to get a useful AI response?</p>
+      <div class="quiz">
+        <button onclick="answerQuiz(this,false)">A. “Make me a presentation about AI.”</button>
+        <button onclick="answerQuiz(this,true)">B. “Create a 5-slide presentation teaching AI prompting to 16–19-year-old beginners. Include a title, big idea, GCSCE framework, examples, practice task and speaker notes.”</button>
+        <button onclick="answerQuiz(this,false)">C. “Tell me everything about prompt engineering.”</button>
+      </div>
+      <div class="output" id="quizOutput">Pick an answer.</div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Before you press Enter, ask: have I given enough instructions? If the answer is not good enough, improve the prompt.</p>
+  </footer>
+</div>
+
+<script>
+  const taskCards = document.querySelectorAll('.task');
+  const taskOutput = document.getElementById('taskOutput');
+  taskCards.forEach(card => {
+    card.addEventListener('click', () => {
+      taskCards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      const title = card.querySelector('h3').textContent.trim();
+      taskOutput.textContent = `${title} prompt recipe: ${card.dataset.tip}`;
+    });
+  });
+
+  function byId(id){ return document.getElementById(id); }
+  function clean(value){ return (value || '').trim(); }
+
+  function buildPrompt(){
+    const goal = clean(byId('goal').value);
+    const context = clean(byId('context').value);
+    const specifics = clean(byId('specifics').value);
+    const constraints = clean(byId('constraints').value);
+    const evaluate = clean(byId('evaluate').value);
+    const lines = [];
+    if(goal) lines.push(`Goal: ${goal}.`);
+    if(context) lines.push(`Context: ${context}.`);
+    if(specifics) lines.push(`Specifics: ${specifics}.`);
+    if(constraints) lines.push(`Constraints: ${constraints}.`);
+    if(evaluate) lines.push(`Evaluate: ${evaluate}.`);
+    byId('promptOutput').textContent = lines.length ? lines.join('\n') : 'Add at least one GCSCE detail to build your prompt.';
+  }
+
+  function loadExample(){
+    byId('goal').value = 'Create a GCSE revision summary about photosynthesis';
+    byId('context').value = 'for a 16-year-old Biology student';
+    byId('specifics').value = 'include inputs, outputs, why it matters and one relatable analogy';
+    byId('constraints').value = 'use simple language, bullet points and max 150 words';
+    byId('evaluate').value = 'finish with one quiz question to check understanding';
+    buildPrompt();
+  }
+
+  async function copyPrompt(){
+    const text = byId('promptOutput').textContent;
+    try{
+      await navigator.clipboard.writeText(text);
+      byId('promptOutput').textContent = text + '\n\nCopied to clipboard.';
+    }catch(e){
+      byId('promptOutput').textContent = text + '\n\nCopy failed. Select the text and copy manually.';
+    }
+  }
+
+  function answerQuiz(button, correct){
+    document.querySelectorAll('.quiz button').forEach(b => b.classList.remove('correct','wrong'));
+    button.classList.add(correct ? 'correct' : 'wrong');
+    byId('quizOutput').textContent = correct
+      ? 'Correct. Option B gives audience, structure, content, format and success criteria.'
+      : 'Not quite. That prompt still leaves the AI guessing about audience, format and success criteria.';
+  }
+</script>
+</body>
+</html>
